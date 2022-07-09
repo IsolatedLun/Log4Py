@@ -1,7 +1,9 @@
-# Log4Py, The Best Logger for Python with 0 Vulnerabities... well hopefully.
+# Log4Py, The Best Logger for Python. 
+With 0 Vulnerabities... well hopefully.
 
 ## Usage
 `
+
     from log4Py import Logger
     import __main__
 
