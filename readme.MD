@@ -16,6 +16,6 @@ With 0 Vulnerabities... well hopefully.
     res = add(1, 2) # ...] [{ NOW } | INFO] Executed func <add(1, 2)> fr, returned 3 ]...
 
     if res == 3:
-        logger.log(override='Wow, 2 + 1 = 3!', type='INFO')
+        logger.debug('Wow, 2 + 1 = 3!')
 
 `

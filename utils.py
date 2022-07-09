@@ -1,3 +1,6 @@
+# ==============
+# Log utils
+# =============
 def readify_params(*args, **kwargs):
     """
         Converts *, ** params to a readable string format.
@@ -32,10 +35,28 @@ def show_res_or_err(res: str, e: Exception, curr_file):
                 'file': tb.tb_frame.f_code.co_filename,
             })
             tb = tb.tb_next
-        return prettify_trace(trace), f'<{type(e).__name__} than {str(e)[0:24]}..., line {trace[-1]["line"]} from origin: {trace[-1]["file"]}>'
+
+        return prettify_trace(trace)
     else:
         res += f' from "{curr_file.__file__}"'
-    return res, res
+    return res
+
+def create_log_dict(f_name, args, kwargs):
+    return {
+        "func_name": f_name,
+        "args": args,
+        "kwargs": kwargs,
+    }
+
+def logger_default_write(obj):
+    # WIP
+    print(obj)
+
+# ============
+# Short-hands
+# ============
+def prop_or_default(x, default):
+    return x if x is not None else default
 
 def get_path_file_name(path: str):
     return path.split('\\')[-1]

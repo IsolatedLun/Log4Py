@@ -1,48 +1,70 @@
-from utils import readify_params, show_res_or_err, get_path_file_name
+from log4PyConfig import LoggerConfig
+from utils import (create_log_dict, prop_or_default, readify_params, show_res_or_err, get_path_file_name)
 from datetime import datetime
+from colorama import Fore, init as coloroma_int
+
+coloroma_int()
 
 class Logger(object):
-    def __init__(self, main, log_path=None):
+    def __init__(self, main, config=None, log_path=None):
         self.main = main 
+        self.config = prop_or_default(config, LoggerConfig)()
+
+        self.run_checks()
+
         self.log_path = f'{get_path_file_name(self.main.__file__)}.log.txt' if log_path is None else log_path
 
     def watch(self, func):
         """
-            Decorator function used for logging functions.
+            Decorator function used for watching/logging functions.
         """
         def watch_wrapper(*args, **kwargs):
-            result = {'type': 'INFO', 'res': None}
-            _e = None
+            result = None
+            to_log = None
+            err = False
 
             try:
-                result['res'] = func(*args, **kwargs)
+                result = to_log = func(*args, **kwargs)
             except Exception as e:
-                _e = e
-                
-                result['res'] = _e
-                result['type'] = 'ERR'
+                to_log = show_res_or_err(result, e, self.main)
+                err = True
 
-            to_log, to_show = show_res_or_err(result["res"], _e, self.main)
-            self.log(
-                f'Executed func <{func.__name__}({readify_params(*args, **kwargs)})>, returned {to_log}', 
-                f'Executed func <{func.__name__}({readify_params(*args, **kwargs)})>, returned {to_show}', 
-                result['type']
-            )
-            return result['res']
+            msg = f'Executed func <{func.__name__}({readify_params(*args, **kwargs)})>, returned {to_log}'
+            if err: 
+                self.error(msg, create_log_dict(func.__name__, args, kwargs))
+            else: 
+                self.debug(msg, create_log_dict(func.__name__, args, kwargs))
+            
+            return result
 
         return watch_wrapper
 
-    def log(self, to_log='', to_show='', type='DEF', override=None):
+    # ======================
+    # Log functions
+    # ======================
+    def log(self, to_log, type, obj=None):
         """
-            Prints a short version of the log to the terminal.
-            Appends log to a txt file.
+            Typical log function.
+            Displays log data and adds it somewhere depending on the config
         """
-        if override is not None:
-            to_show = to_log = override
+        log_time = str(datetime.now())
 
-        to_log = f'[{datetime.now()} | {type}] ' + to_log + '\n' 
-        to_show = f'[{datetime.now()} | {type}] ' + to_show + '\n'
+        to_log = f'[{log_time} | {type}] ' + to_log + '\n' 
 
-        with open(self.log_path, 'w') as logf:
-            logf.write(to_log)
-        print(to_show)
+        # Used for writing to files/databases...
+        if obj:
+            obj['log_time'] = log_time
+
+            self.config.write_func(obj)
+        print(to_log)
+
+    # ======================
+    # Init functions
+    # ======================
+    def run_checks(self):
+        if getattr(self.main, '__name__', None) is None:
+            raise ValueError('__main__ argument is invalid.')
+    
+    def debug(self, msg: str, obj=None): return self.log(msg, 'INFO', obj)
+    def warn(self, msg: str, obj=None): return self.log(msg, 'WARN', obj)
+    def error(self, msg: str, obj=None): return self.log(msg, 'ERR', obj)
