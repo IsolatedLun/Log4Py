@@ -1,6 +1,6 @@
 # ==============
-# Log utils
-# =============
+# Prettifiers
+# ==============
 def prettify_params(*args, **kwargs):
     """
         Converts *, ** params to a readable string format.
@@ -11,6 +11,19 @@ def prettify_params(*args, **kwargs):
         res += f', {key}={val}'
     return res
 
+def prettify_trace(trace):
+    """
+        Prettifies the traceback of an error.
+    """
+    res = 'returned ERR'
+
+    for x in trace:
+        res += f'\n \t Error: at line {x["line"]}, in {x["file"]}'
+    return res
+
+# ==============
+# Log utils
+# ==============
 def show_res_or_err(res: str, e: Exception, curr_file):
     """
         Shows the result or error if there is an exception.
@@ -18,13 +31,6 @@ def show_res_or_err(res: str, e: Exception, curr_file):
     """
 
     res = str(res)
-
-    def prettify_trace(trace):
-        res = 'returned ERR'
-
-        for x in trace:
-            res += f'\n \t Error: at line {x["line"]}, in {x["file"]}'
-        return res
 
     if e:
         trace = []
@@ -50,9 +56,10 @@ def create_log_dict(f_name, args, kwargs, exc=None):
         "exception": exc
     }
 
-def logger_default_write(obj):
-    # WIP
-    print(obj)
+# ==============
+# Log config utils
+# ==============
+
 
 # ============
 # Short-hands
