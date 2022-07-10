@@ -1,7 +1,7 @@
 # ==============
 # Log utils
 # =============
-def readify_params(*args, **kwargs):
+def prettify_params(*args, **kwargs):
     """
         Converts *, ** params to a readable string format.
     """
@@ -16,6 +16,7 @@ def show_res_or_err(res: str, e: Exception, curr_file):
         Shows the result or error if there is an exception.
         Exceptions are shown with all of their tracebacks.
     """
+
     res = str(res)
 
     def prettify_trace(trace):
@@ -41,11 +42,12 @@ def show_res_or_err(res: str, e: Exception, curr_file):
         res += f' from "{curr_file.__file__}"'
     return res
 
-def create_log_dict(f_name, args, kwargs):
+def create_log_dict(f_name, args, kwargs, exc=None):
     return {
         "func_name": f_name,
         "args": args,
         "kwargs": kwargs,
+        "exception": exc
     }
 
 def logger_default_write(obj):

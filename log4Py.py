@@ -1,5 +1,8 @@
 from log4PyConfig import LoggerConfig
-from utils import (create_log_dict, prop_or_default, readify_params, show_res_or_err, get_path_file_name)
+from utils import (create_log_dict, prop_or_default, prettify_params, 
+    show_res_or_err, 
+    get_path_file_name)
+    
 from datetime import datetime
 from colorama import Fore, init as coloroma_int
 
@@ -12,8 +15,8 @@ class Logger(object):
 
         self.run_checks()
 
-        self.log_path = f'{get_path_file_name(self.main.__file__)}.log.txt' if log_path is None else log_path
-
+        self.log_path = self.config.log_path
+        self.color_codes = self.config.color_codes
     def watch(self, func):
         """
             Decorator function used for watching/logging functions.
@@ -21,17 +24,17 @@ class Logger(object):
         def watch_wrapper(*args, **kwargs):
             result = None
             to_log = None
-            err = False
+            err = None
 
             try:
                 result = to_log = func(*args, **kwargs)
             except Exception as e:
                 to_log = show_res_or_err(result, e, self.main)
-                err = True
+                err = e
 
             msg = f'Executed func <{func.__name__}({readify_params(*args, **kwargs)})>, returned {to_log}'
             if err: 
-                self.error(msg, create_log_dict(func.__name__, args, kwargs))
+                self.error(msg, create_log_dict(func.__name__, args, kwargs, e))
             else: 
                 self.debug(msg, create_log_dict(func.__name__, args, kwargs))
             
@@ -47,9 +50,12 @@ class Logger(object):
             Typical log function.
             Displays log data and adds it somewhere depending on the config
         """
-        log_time = str(datetime.now())
 
-        to_log = f'[{log_time} | {type}] ' + to_log + '\n' 
+        def create_log(time, data):
+            return f'[{log_time}]: {to_log} \n'
+
+        log_time = str(datetime.now())
+        to_log = create_log(log_time, to_log) 
 
         # Used for writing to files/databases...
         if obj:
@@ -65,6 +71,9 @@ class Logger(object):
         if getattr(self.main, '__name__', None) is None:
             raise ValueError('__main__ argument is invalid.')
     
+    # =================
+    # Log functions
+    # =================
     def debug(self, msg: str, obj=None): return self.log(msg, 'INFO', obj)
     def warn(self, msg: str, obj=None): return self.log(msg, 'WARN', obj)
     def error(self, msg: str, obj=None): return self.log(msg, 'ERR', obj)
