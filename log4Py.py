@@ -69,6 +69,9 @@ class Logger(object):
         log_time = str(datetime.now())
         to_log = self.config.format.format(time=log_time, msg=to_log, type=self.config.color_codes[_type])
 
+        if self.config.save_func:
+            self.config.save_func(obj)
+
         print(to_log)
 
     # ======================
@@ -76,10 +79,10 @@ class Logger(object):
     # ======================
     def run_checks(self, main, config):
         if getattr(main, '__name__', None) is None:
-            raise ValueError('No __main__ module found.')
+            raise ValueError('No "__main__" module found.')
 
         if type(config) != dict:
-            raise ValueError(f"Config must be a {dict} but its a {type(config)}.")
+            raise ValueError(f'Config must be a {dict}, not "{type(config)}".')
     
     # =================
     # Log functions
