@@ -48,12 +48,14 @@ def show_res_or_err(res: str, e: Exception, curr_file):
         res += f' from "{curr_file.__file__}"'
     return res
 
-def create_log_dict(f_name, args, kwargs, exc=None):
+def create_function_log_dict(f_name: str=None, args: tuple=None, kwargs: dict=None, 
+    returned=None, exc: Exception=None):
     return {
         "func_name": f_name,
+        "returned": returned,
         "args": args,
         "kwargs": kwargs,
-        "exception": exc
+        "exception": exc,
     }
 
 # ==============
@@ -64,7 +66,7 @@ def default_log_saver(data: dict, *args):
 
     if path.exists(args[0]):
         with open(args[0] + '/' + args[1], 'a+') as f:
-            f.write(data['log_message'])
+            f.write(f'[{data["datetime"]}] {data["log_message"]} _{data["type"]}_' + '\n\n')
         
         return;
     else:
