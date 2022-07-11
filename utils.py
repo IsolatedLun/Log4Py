@@ -59,6 +59,26 @@ def create_log_dict(f_name, args, kwargs, exc=None):
 # ==============
 # Log config utils
 # ==============
+def default_log_saver(data: dict, *args):
+    from os import path, mkdir
+
+    if path.exists(args[0]):
+        with open(args[0] + '/' + args[1], 'a+') as f:
+            f.write(data['log_message'])
+        
+        return;
+    else:
+        mkdir(args[0])
+
+    return default_log_saver(data, *args)
+
+# ==============
+# Misc
+# ==============
+def is_function(x):
+    from types import FunctionType
+
+    return isinstance(x, FunctionType)
 
 
 # ============
