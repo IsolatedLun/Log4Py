@@ -82,6 +82,22 @@ def is_function(x):
 
     return isinstance(x, FunctionType)
 
+def get_func_name_from_stack(call_line):
+    """
+        Tries to get the function name from where the function was called in the stack.
+    """
+
+    x = None
+
+    try:
+        # Pretty ugly so let's break it down.
+        # stack()[2][4][0] => It's the line where the function is called eg. "my_epic_logger.wow(...)"
+        # .split('(')[0] => logger.wow
+        # .split('.')[1] => wow
+        x = call_line[2][4][0].split('(')[0].split('.')[1]
+    except:
+        return x
+    return x if len(x) > 0 else None
 
 # ============
 # Short-hands

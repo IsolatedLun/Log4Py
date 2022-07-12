@@ -27,4 +27,4 @@ if __name__ == '__main__':
     too_many_errors()
 
     logger.set_level('FATAL', 35) # Purple color code
-    logger.log('Purple log', 'FATAL')
+    logger.fatal('Purple log')

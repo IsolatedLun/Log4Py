@@ -1,7 +1,13 @@
 from Configurer.configurer import create_config
-from utils import (create_function_log_dict, is_function, prettify_params, show_res_or_err)
+from utils import (create_function_log_dict, 
+    get_func_name_from_stack, 
+    is_function, 
+    prettify_params, 
+    show_res_or_err
+    )
     
 from datetime import datetime
+from inspect import stack
 from colorama import Fore, init as coloroma_int
 
 coloroma_int()
@@ -57,11 +63,12 @@ class Logger(object):
 
     def set_level(self, level_name: str, color_code: int):
         override = self.config['color_codes'].get(level_name, False)
-        self.config['color_codes'][level_name] = color_code
+        self.config['color_codes'][level_name.upper()] = color_code
 
         if override:
             self.alter(f'Changed level from "{override}" to {level_name}.')
         else:
+            setattr(self, level_name.lower(), self.log)
             self.warn(f'Set new level {level_name}.')
 
 
@@ -75,6 +82,18 @@ class Logger(object):
             Displays log data and adds it somewhere depending on the config
         """
 
+        func_name = get_func_name_from_stack(stack())
+        def decide_type():
+            """
+                Checks to see if the function is a custom added one, if so the type gets set to the function's name,
+                else it returns the type if it's not None, otherwise returns 'INFO'
+            """
+
+            if _type is None and not self.config['color_codes'].get(_type, False):
+                return func_name.upper() if self.config['color_codes'].get(func_name.upper(), False) else 'INFO' 
+            return _type
+
+        _type = decide_type()    
         log_time: str = str(datetime.now())
         to_display: str = self.config['format'].format(time=log_time, msg=to_log, type=self.config['color_codes'][_type])
 
@@ -103,7 +122,7 @@ class Logger(object):
     # =================
     # Log functions
     # =================
-    def log(self, msg: str, type, obj=None, in_save=False): return self.__log(msg, type, obj, in_save)
+    def log(self, msg: str, type=None, obj=None, in_save=False): return self.__log(msg, type, obj, in_save)
     def debug(self, msg: str, obj=None, in_save=False): return self.__log(msg, 'INFO', obj, in_save)
     def alter(self, msg: str, obj=None, in_save=False): return self.__log(msg, 'ALTER', obj, in_save)
     def warn(self, msg: str, obj=None, in_save=False): return self.__log(msg, 'WARN', obj, in_save)
