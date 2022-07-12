@@ -38,7 +38,7 @@ class Logger(object):
                 to_log = show_res_or_err(result, e, self.main)
                 err = e
 
-            msg: str = f'Executed func <{func.__name__}({prettify_params(*args, **kwargs)})>, {to_log}'
+            msg: str = f'Executed func <{func.__name__}({prettify_params(*args, **kwargs)})> => {to_log}'
             if err: 
                 self.error(msg, create_function_log_dict(func.__name__, args, kwargs, result, err))
             else: 
@@ -61,15 +61,18 @@ class Logger(object):
         else:
             self.warn(f'Save function must be a function, not "{type(target)}".')
 
-    def set_level(self, level_name: str, color_code: int):
+    def set_level(self, level_name: str, color_code: int, allow_log_func_creation: bool=True):
         override = self.config['color_codes'].get(level_name, False)
         self.config['color_codes'][level_name.upper()] = color_code
 
         if override:
             self.alter(f'Changed level from "{override}" to {level_name}.')
         else:
-            setattr(self, level_name.lower(), self.log)
-            self.warn(f'Set new level {level_name}.')
+            if allow_log_func_creation:
+                setattr(self, level_name.lower(), self.log)
+
+                self.alter(f'Created log function {level_name.lower()}().')
+            self.alter(f'Set new level {level_name}.')
 
 
 

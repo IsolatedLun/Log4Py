@@ -16,7 +16,9 @@ if __name__ == '__main__':
 
     @logger.watch
     def x(a, b):
-        return a + b
+        def y():
+            return 69 + True + 1 / b ** a
+        return y()
 
     @logger.watch
     def too_many_errors():
